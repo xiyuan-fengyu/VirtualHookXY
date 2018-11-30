@@ -354,15 +354,33 @@ public final class VClientImpl extends IVClient.Stub {
         ClassLoader targetClassLoader = mInitialApplication.getClassLoader();
 
         try {
-            for(String pluginName : VPackageManager.get().getInstalledHookPlugins()) {
-                VLog.w("VirtualHook", "Applying hook "+pluginName);
-                applyHookPlugin(VEnvironment.getPackageResourcePath(pluginName).getAbsolutePath(),
-                        VEnvironment.getPackageLibPath(pluginName).getAbsolutePath(), targetClassLoader);
+            // 从 VEnvironment.getDataDirectory().getAbsolutePath() + "/inject" 加载 inject apk
+            String injectDir = VEnvironment.getDataDirectory().getAbsolutePath() + "/inject";
+            File[] files = new File(injectDir).listFiles();
+            if (files != null) {
+                for (File file : files) {
+                    if (file.getName().endsWith(".apk")) {
+                        String injectApkPath = file.getAbsolutePath();
+                        DexClassLoader hookClassLoader = new DexClassLoader(
+                                injectApkPath,
+                                injectDir,
+                                null,
+                                targetClassLoader);
+                        HookMain.doHookDefault(hookClassLoader, targetClassLoader);
+                        VirtualCore.get().getComponentDelegate().afterApplicationCreate(mInitialApplication);
+                        Log.i("YAHFA", "inject success: " + injectApkPath);
+                    }
+                }
             }
 
+//            for(String pluginName : VPackageManager.get().getInstalledHookPlugins()) {
+//                VLog.w("VirtualHook", "Applying hook "+pluginName);
+//                applyHookPlugin(VEnvironment.getPackageResourcePath(pluginName).getAbsolutePath(),
+//                        VEnvironment.getPackageLibPath(pluginName).getAbsolutePath(), targetClassLoader);
+//            }
         }
         catch (Exception e) {
-            e.printStackTrace();
+            Log.e("YAHFA", "inject fail", e);
         }
 
     }
