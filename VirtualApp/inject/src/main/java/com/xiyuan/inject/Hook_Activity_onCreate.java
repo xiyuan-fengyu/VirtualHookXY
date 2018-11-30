@@ -21,7 +21,7 @@ public class Hook_Activity_onCreate {
     }
 
     public static void backup(Object thiz, Bundle bundle) {
-        Log.i("xiyuan", "backup");
+        // 原方法的桩，这里面不要写东西，写了也没有用
     }
 
 }
