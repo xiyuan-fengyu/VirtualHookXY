@@ -1,11 +1,12 @@
 # VirtualHook
 ## 体验方式
 1. 编译整个项目
-2. 安装运行app
+2. 安装运行 VirtualHook app
 3. 运行 push_inject.bat
 4. 在 Logcat 中添加两个 filter， tag分别为： YAHFA, xiyuan  
     YAHFA 过滤的日志是注入过程相关的信息  
     xiyuan 过滤的日志是注入的代码打印的日志  
+5. 在 VirtualHook app 中添加已手机中已经安装的其他app，然后运行  
     每当打开新的Activity，就会在xiyuan这个tag中看到日志  
 
 ## 更改说明
