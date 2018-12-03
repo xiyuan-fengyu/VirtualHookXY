@@ -56,7 +56,7 @@ public class Hook_Activity_onCreate {
 ```
 
 ### 辅助服务
-在VirtualApp中启动一个新的app同时，会启动服务服务器  
+在VirtualApp中启动一个新的app同时，会启动一个辅助服务器  
 在 YAHFA 过滤的日志中可以看到服务器的相关信息以及可用的rest api列表  
 如果手机和开发者电脑不在同一个网段，可以通过adb shell连接手机后，在shell中通过 curl 命令来访问rest api
 
