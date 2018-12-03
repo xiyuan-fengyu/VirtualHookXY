@@ -62,7 +62,7 @@ public class Hook_Activity_onCreate {
 
 目前提供的rest api
 ```
-/methods?class=<className>[&method=<methodName>]    打印类中定义的所有方法（包括构造方法），方便查询方法签名
+/methods?class=<className>[&method=<methodName>]    打印类中定义的方法（包括构造方法），方便查询方法签名，通过method参数进行过滤，如果要查询构造函数，令method=<init>
 ```
 
 ## 更新日志
