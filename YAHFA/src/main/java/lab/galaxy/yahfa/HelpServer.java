@@ -3,6 +3,7 @@ package lab.galaxy.yahfa;
 import android.util.Log;
 
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
@@ -70,6 +71,11 @@ public class HelpServer extends NanoHTTPD {
             if (aClass != null) {
                 List<String> methodName = session.getParameters().get("method");
                 StringBuilder builder = new StringBuilder();
+                for (Constructor<?> constructor : aClass.getDeclaredConstructors()) {
+                    if (methodName == null || methodName.contains("<init>")) {
+                        builder.append(constructor.toString()).append('\n');
+                    }
+                }
                 for (java.lang.reflect.Method method : aClass.getDeclaredMethods()) {
                     if (methodName == null ||  methodName.contains(method.getName())) {
                         builder.append(method.toString()).append('\n');

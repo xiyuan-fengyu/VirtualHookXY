@@ -2,6 +2,7 @@ package lab.galaxy.yahfa;
 
 import android.util.Log;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.LinkedList;
@@ -18,7 +19,7 @@ public class HookMain {
 
     private static List<Class<?>> hookInfoClasses = new LinkedList<>();
 
-    private static final Matcher hookClassNameM = Pattern.compile(".* ([^ ()]+)\\.[^ .]+\\(.*").matcher("");
+    private static final Matcher hookMethodM = Pattern.compile(".* ([^ ()]+)\\(.*").matcher("");
 
     static {
         System.loadLibrary("yahfa");
@@ -44,20 +45,32 @@ public class HookMain {
             Log.i(TAG, "Start hooking with item " + hookInfo.getName());
 
             String hookMethodSignature = (String) hookInfo.getDeclaredField("method").get(null);
-            String hookClassName = null;
-            synchronized (hookClassNameM) {
-                hookClassNameM.reset(hookMethodSignature);
-                if (hookClassNameM.find()) {
-                    hookClassName = hookClassNameM.group(1);
+            String hookClassMethodName = null;
+            synchronized (hookMethodM) {
+                hookMethodM.reset(hookMethodSignature);
+                if (hookMethodM.find()) {
+                    hookClassMethodName = hookMethodM.group(1);
                 }
             }
 
-            if(hookClassName == null) {
+            if(hookClassMethodName == null) {
                 Log.w(TAG, "No target class. Skipping...");
                 return;
             }
 
-            Class<?> hookClass = Class.forName(hookClassName, true, originClassLoader);
+            boolean isConstructor = false;
+            String hookClassName;
+            Class<?> hookClass;
+            try {
+                hookClassName = hookClassMethodName.substring(0, hookClassMethodName.lastIndexOf('.'));
+                hookClass = Class.forName(hookClassName, true, originClassLoader);
+            }
+            catch (Exception e) {
+                hookClass = Class.forName(hookClassMethodName, true, originClassLoader);
+                hookClassName = hookClassMethodName;
+                isConstructor = true;
+            }
+
             if(Modifier.isAbstract(hookClass.getModifiers())) {
                 Log.w(TAG, "Hook may fail for abstract class: " + hookClassName);
             }
@@ -76,17 +89,34 @@ public class HookMain {
                 return;
             }
 
-            Method original = null;
-            for (Method method : hookClass.getDeclaredMethods()) {
-                if (method.toString().equals(hookMethodSignature)) {
-                    original = method;
-                    break;
+            Object original = null;
+            if (isConstructor) {
+                for (Constructor<?> constructor : hookClass.getDeclaredConstructors()) {
+                    if (constructor.toString().equals(hookMethodSignature)) {
+                        original = constructor;
+                        break;
+                    }
+                }
+            }
+            else {
+                for (Method method : hookClass.getDeclaredMethods()) {
+                    if (method.toString().equals(hookMethodSignature)) {
+                        original = method;
+                        break;
+                    }
                 }
             }
             if (original == null) {
                 StringBuilder builder = new StringBuilder();
-                for (Method method : hookClass.getDeclaredMethods()) {
-                    builder.append(method.toString()).append('\n');
+                if (isConstructor) {
+                    for (Constructor<?> constructor : hookClass.getDeclaredConstructors()) {
+                        builder.append(constructor.toString()).append('\n');
+                    }
+                }
+                else {
+                    for (Method method : hookClass.getDeclaredMethods()) {
+                        builder.append(method.toString()).append('\n');
+                    }
                 }
                 Log.e(TAG, "Cannot find original method: " + hookMethodSignature
                         + "\nYou may may check the method signature with the following:\n"
@@ -101,7 +131,7 @@ public class HookMain {
         }
     }
 
-    private static native void bindBackupHook(Method original, Method hook, Method backup);
+    private static native void bindBackupHook(Object original, Method hook, Method backup);
 
     private static native void init(int SDK_version);
 }

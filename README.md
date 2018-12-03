@@ -62,7 +62,7 @@ public class Hook_Activity_onCreate {
 
 目前提供的rest api
 ```
-/methods?class=<className>[&method=<methodName>]    打印类中定义的所有方法
+/methods?class=<className>[&method=<methodName>]    打印类中定义的所有方法（包括构造方法），方便查询方法签名
 ```
 
 ## 更新日志
@@ -70,5 +70,4 @@ public class Hook_Activity_onCreate {
 1. 更新整个项目的结构，方便在AS中分辨不同的项目
 2. 重写钩子的声明方式
 3. 提供额外服务，方便查询类的方法列表
-
 

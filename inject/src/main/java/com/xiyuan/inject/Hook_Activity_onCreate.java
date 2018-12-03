@@ -19,7 +19,7 @@ public class Hook_Activity_onCreate {
     }
 
     public static void backup(Object thiz, Bundle bundle) {
-        Log.i("xiyuan", "backup");
+        // just a method stub for original method
     }
 
 }
