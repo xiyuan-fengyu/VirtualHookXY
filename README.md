@@ -13,44 +13,40 @@
 ### 注入声明方式
 在原项目的基础上更改了注入代码的加载方式和注入的声明方式，使得申明更加简单  
 详见 inject 模块  
-```
-package lab.galaxy.yahfa;
+```java
+package com.xiyuan.hook;
 
-import com.xiyuan.inject.Hook_Activity_onCreate;
-
-/**
- * Created by liuruikai756 on 31/03/2017.
- */
-
-public class Hooks {
-
-    public static Class[] hooks = {
-            Hook_Activity_onCreate.class
-    };
-
-}
-```
-```
-package com.xiyuan.inject;
-
+import android.app.Activity;
+import android.app.Activity_onCreate;
+import android.app.Activity_onPause;
+import android.app.Activity_onResume;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.xiyuan.hookmethod.HookMethod;
+
 /**
- * Created by xiyuan_fengyu on 2018/11/29.
+ * Created by xiyuan_fengyu on 2018/12/4.
  */
 
-public class Hook_Activity_onCreate {
+public class Hook_Activity {
 
-    public static String method = "protected void android.app.Activity.onCreate(android.os.Bundle)";
-
-    public static void hook(Object thiz, Bundle bundle) {
-        Log.i("xiyuan", "new activity: " + thiz);
-        backup(thiz, bundle);
+    @HookMethod("protected void android.app.Activity.onCreate(android.os.Bundle)")
+    public static void onCreate(Activity thiz, Bundle bundle) {
+        Log.i("xiyuan", "onCreate: " + thiz);
+        Activity_onCreate.invoke(thiz, bundle);
     }
 
-    public static void backup(Object thiz, Bundle bundle) {
-        Log.i("xiyuan", "backup");
+    @HookMethod("protected void android.app.Activity.onResume()")
+    public static void onResume(Activity thiz) {
+        Log.i("xiyuan", "onResume: " + thiz);
+        Activity_onResume.invoke(thiz);
+    }
+
+    @HookMethod("protected void android.app.Activity.onPause()")
+    public static void onPause(Activity thiz) {
+        Log.i("xiyuan", "onPause: " + thiz);
+        Activity_onPause.invoke(thiz);
     }
 
 }
@@ -67,6 +63,10 @@ public class Hook_Activity_onCreate {
 ```
 
 ## 更新日志
+### 2018-12-04
+1. 继续重写钩子的声明方式，使用更加优雅  
+2. 重写 push_inject.bat  
+
 ### 2018-12-03
 1. 更新整个项目的结构，方便在AS中分辨不同的项目
 2. 重写钩子的声明方式

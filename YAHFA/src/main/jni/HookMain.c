@@ -191,19 +191,19 @@ static int doBackupAndHook(void *targetMethod, void *hookMethod, void *backupMet
     return 0;
 }
 
-void Java_lab_galaxy_yahfa_HookMain_bindBackupHook(
-        JNIEnv *env, jclass clazz, jobject original, jobject hook, jobject backup) {
+void Java_lab_galaxy_yahfa_HookMain_bind(
+        JNIEnv *env, jclass clazz, jobject original, jobject hook, jobject orignalStub) {
     void *targetMethod = (void *)(*env)->FromReflectedMethod(env, original);
     if(targetMethod == NULL) {
         jclass exceptionClass =  (*env)->FindClass(env, "java/lang/Exception");
-        (*env)->ThrowNew(env, exceptionClass, "Cannot find original method");
+        (*env)->ThrowNew(env, exceptionClass, "cannot find the original method");
         return;
     }
 
     if(!doBackupAndHook(
             targetMethod,
             (void *)(*env)->FromReflectedMethod(env, hook),
-            backup==NULL ? NULL : (void *)(*env)->FromReflectedMethod(env, backup)
+            orignalStub==NULL ? NULL : (void *)(*env)->FromReflectedMethod(env, orignalStub)
     )) {
         // keep a global ref so that the hook method would not be GCed
         (*env)->NewGlobalRef(env, hook);
