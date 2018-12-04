@@ -51,6 +51,59 @@ public class Hook_Activity {
 
 }
 ```
+```java
+package com.xiyuan.hook;
+
+import android.util.Log;
+
+import com.xiyuan.hookmethod.HookMethod;
+
+import java.io.File_constructor;
+import java.net.URI;
+
+/**
+ * Created by xiyuan_fengyu on 2018/12/4.
+ */
+
+public class Hook_File {
+
+    @HookMethod("public java.io.File(java.lang.String)")
+    public static Object constructor(Object thiz, String path) {
+        Log.i("xiyuan", "new File: " + path);
+        return File_constructor.invoke(thiz, path);
+    }
+
+}
+```
+```java
+package com.xiyuan.hook;
+
+import android.content.Context;
+import android.content.Intent_constructor;
+import android.util.Log;
+
+import com.xiyuan.hookmethod.HookMethod;
+
+/**
+ * Created by xiyuan_fengyu on 2018/12/4.
+ */
+
+public class Hook_Intent {
+
+    @HookMethod("public android.content.Intent(android.content.Context,java.lang.Class)")
+    public static Object constructor(Object thiz, Context ctx, Class clazz) {
+        Log.i("xiyuan", "new Intent: " + thiz + ", " + ctx + ", " + clazz);
+        return Intent_constructor.invoke(thiz, ctx, clazz);
+    }
+
+    @HookMethod("public android.content.Intent()")
+    public static Object constructor(Object thiz) {
+        Log.i("xiyuan", "new Intent: " + thiz);
+        return Intent_constructor.invoke(thiz);
+    }
+
+}
+```
 
 ### 辅助服务
 在VirtualApp中启动一个新的app同时，会启动一个辅助服务器  
