@@ -69,15 +69,16 @@ public class HelpServer extends NanoHTTPD {
             }
 
             if (aClass != null) {
-                List<String> methodName = session.getParameters().get("method");
+                list = session.getParameters().get("method");
+                String methodRegex = list == null || list.isEmpty() ? null : list.get(0);
                 StringBuilder builder = new StringBuilder();
                 for (Constructor<?> constructor : aClass.getDeclaredConstructors()) {
-                    if (methodName == null || methodName.contains("<init>")) {
+                    if (methodRegex == null || methodRegex.equals("<init>") || constructor.toString().matches(methodRegex)) {
                         builder.append(constructor.toString()).append('\n');
                     }
                 }
                 for (java.lang.reflect.Method method : aClass.getDeclaredMethods()) {
-                    if (methodName == null ||  methodName.contains(method.getName())) {
+                    if (methodRegex == null ||  methodRegex.equals(method.getName()) || method.toString().matches(methodRegex)) {
                         builder.append(method.toString()).append('\n');
                     }
                 }

@@ -3,23 +3,23 @@
 1. 编译整个项目
 2. 安装运行 VirtualHook app
 3. 运行 push_inject.bat
-4. 在 Logcat 中添加两个 filter， tag分别为： YAHFA, xiyuan  
+4. 在 Logcat 中添加一个 filter， tag分为： xiyuan|YAHFA，启用Regex  
     YAHFA 过滤的日志是注入过程相关的信息  
     xiyuan 过滤的日志是注入的代码打印的日志  
 5. 在 VirtualHook app 中添加手机中已经安装的其他app，然后运行  
-    每当打开新的Activity，就会在xiyuan这个tag中看到日志  
+    在日志中可以看到很多有用的信息    
 
 ## 更改说明
 ### 注入声明方式
 在原项目的基础上更改了注入代码的加载方式和注入的声明方式，使得申明更加简单  
-详见 inject 模块  
+在注入过程中，用于保存原方法地址的桩方法是通过java annotation processor生成的  
+
+注入声明的过程：  
+编写一个 Hook 类，在其中声明一个通过@HookMethod注解的public static方法  
 ```java
 package com.xiyuan.hook;
 
 import android.app.Activity;
-import android.app.Activity_onCreate;
-import android.app.Activity_onPause;
-import android.app.Activity_onResume;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -34,76 +34,34 @@ public class Hook_Activity {
     @HookMethod("protected void android.app.Activity.onCreate(android.os.Bundle)")
     public static void onCreate(Activity thiz, Bundle bundle) {
         Log.i("xiyuan", "onCreate: " + thiz);
-        Activity_onCreate.invoke(thiz, bundle);
-    }
-
-    @HookMethod("protected void android.app.Activity.onResume()")
-    public static void onResume(Activity thiz) {
-        Log.i("xiyuan", "onResume: " + thiz);
-        Activity_onResume.invoke(thiz);
-    }
-
-    @HookMethod("protected void android.app.Activity.onPause()")
-    public static void onPause(Activity thiz) {
-        Log.i("xiyuan", "onPause: " + thiz);
-        Activity_onPause.invoke(thiz);
     }
 
 }
 ```
-```java
-package com.xiyuan.hook;
-
-import android.util.Log;
-
-import com.xiyuan.hookmethod.HookMethod;
-
-import java.io.File_constructor;
-import java.net.URI;
-
-/**
- * Created by xiyuan_fengyu on 2018/12/4.
- */
-
-public class Hook_File {
-
-    @HookMethod("public java.io.File(java.lang.String)")
-    public static Object constructor(Object thiz, String path) {
-        Log.i("xiyuan", "new File: " + path);
-        return File_constructor.invoke(thiz, path);
-    }
-
+编译 inject 模块，在 inject/build/generated/source/apt/debug 目录下将会生成   
+protected void android.app.Activity.onCreate(android.os.Bundle)  
+这个方法对应的桩方法类  
+android.app.Activity_onCreate  
+其中定义了一个方法  
+```
+public static <T> T invoke(android.app.Activity thiz, android.os.Bundle bundle) {
+    // Stub for the orignal method
+    return null;
 }
 ```
-```java
-package com.xiyuan.hook;
-
-import android.content.Context;
-import android.content.Intent_constructor;
-import android.util.Log;
-
-import com.xiyuan.hookmethod.HookMethod;
-
-/**
- * Created by xiyuan_fengyu on 2018/12/4.
- */
-
-public class Hook_Intent {
-
-    @HookMethod("public android.content.Intent(android.content.Context,java.lang.Class)")
-    public static Object constructor(Object thiz, Context ctx, Class clazz) {
-        Log.i("xiyuan", "new Intent: " + thiz + ", " + ctx + ", " + clazz);
-        return Intent_constructor.invoke(thiz, ctx, clazz);
-    }
-
-    @HookMethod("public android.content.Intent()")
-    public static Object constructor(Object thiz) {
-        Log.i("xiyuan", "new Intent: " + thiz);
-        return Intent_constructor.invoke(thiz);
-    }
-
+在 Hook_Activity 的 onCreate 方法中调用 Activity_onCreate.invoke  
+```
+@HookMethod("protected void android.app.Activity.onCreate(android.os.Bundle)")
+public static void onCreate(Activity thiz, Bundle bundle) {
+    Log.i("xiyuan", "onCreate: " + thiz);
+    Activity_onCreate.invoke(thiz, bundle);
 }
 ```
+在注入成功后，调用 Activity_onCreate.invoke 方法即是对原方法的调用  
+有些情况下也可以不用调用原方法  
+
+类的成员方法，构造方法，native方法都可以被hook  
+详见 inject 模块几个注入的例子    
 
 ### 辅助服务
 在VirtualApp中启动一个新的app同时，会启动一个辅助服务器  
