@@ -61,6 +61,7 @@ public static void onCreate(Activity thiz, Bundle bundle) {
 有些情况下也可以不用调用原方法  
 
 类的成员方法，构造方法，native方法都可以被hook  
+注意：目标方法为静态方法时，hook方法和桩方法参数列表没有 thiz 这个参数   
 详见 inject 模块几个注入的例子    
 
 ### 辅助服务
@@ -73,7 +74,14 @@ public static void onCreate(Activity thiz, Bundle bundle) {
 /methods?class=<className>[&method=<methodName>]    打印类中定义的方法（包括构造方法），方便查询方法签名，通过method参数进行过滤，如果要查询构造函数，令method=<init>
 ```
 
+## 已知问题
+1. java.lang.System类中的方法hook后，应用可能无法启动  
+
 ## 更新日志
+### 2018-12-06
+1. 桩方法返回值改为 (T) new Object ，防止编辑组提示空指针异常警告  
+2. 编写静态目标方法的hook例子  
+
 ### 2018-12-04
 1. 继续重写钩子的声明方式，使用更加优雅  
 2. 重写 push_inject.bat  
