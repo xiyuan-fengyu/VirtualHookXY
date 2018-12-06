@@ -96,13 +96,6 @@ public class HookMethodAnnotationProcessor extends AbstractProcessor {
 
         if (hookClasses.size() > 0) {
             // begin to generate java file
-            try {
-                generateHooksJava(hookClasses);
-            } catch (IOException e) {
-                error("generate com.xiyuan.hookmethod.Hooks.java fail: " + e.getMessage());
-//            e.printStackTrace();
-            }
-
             for (Map.Entry<String, Set<String>> entry : originalStubs.entrySet()) {
                 try {
                     generateStubsJava(entry.getKey(), entry.getValue());
@@ -111,6 +104,14 @@ public class HookMethodAnnotationProcessor extends AbstractProcessor {
 //                e.printStackTrace();
                 }
             }
+
+            try {
+                generateHooksJava(hookClasses);
+            } catch (IOException e) {
+                error("generate com.xiyuan.hookmethod.Hooks.java fail: " + e.getMessage());
+//            e.printStackTrace();
+            }
+
             return true;
         }
         else return false;
@@ -169,6 +170,10 @@ public class HookMethodAnnotationProcessor extends AbstractProcessor {
         if (!isStatic) {
             orignalMethodParamTypes.add(0, orignalClassName);
         }
+//        else {
+//            orignalMethodParamTypes.add(0, "java.lang.Class");
+//        }
+
         // exp: onCreate(java.lang.Object,android.os.Bundle)
         List<String> hookMethodParamTypes = parseMethodParamTypes(hookMethodEle.toString());
 //        note(orignalMethodParamTypes.stream().collect(Collectors.joining("    ")) + "    size=" + orignalMethodParamTypes.size());
@@ -204,7 +209,7 @@ public class HookMethodAnnotationProcessor extends AbstractProcessor {
                 stubMethod.append(", ");
             }
         }
-        stubMethod.append(") {\n        // Stub for the orignal method\n        return null;\n    }\n\n");
+        stubMethod.append(") {\n        // Stub for the orignal method\n        return (T) new Object();\n    }\n\n");
         return new String[] {stubClassName, stubMethod.toString()};
     }
 
