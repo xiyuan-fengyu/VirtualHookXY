@@ -81,6 +81,7 @@ public static void onCreate(Activity thiz, Bundle bundle) {
 ### 2018-12-06
 1. 桩方法返回值改为 (T) new Object ，防止编辑组提示空指针异常警告  
 2. 编写静态目标方法的hook例子  
+3. 通过build.gradle, inject 模块编译生成apk后自动将apk导入到手机相应目录  
 
 ### 2018-12-04
 1. 继续重写钩子的声明方式，使用更加优雅  

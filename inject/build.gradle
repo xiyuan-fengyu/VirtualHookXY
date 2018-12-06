@@ -28,6 +28,38 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
 
+    // auto push apk to phone by adb command after module build
+    applicationVariants.all { variant ->
+        variant.assemble.doLast {
+            exec {
+                def line = 'adb exec-out run-as io.virtualhook mkdir /data/data/io.virtualhook/virtual/data/inject/'
+                println(':' + project.name + ':pushInjectApk ' + line)
+                commandLine line.split(' ')
+            }
+            variant.outputs.forEach { output ->
+                exec {
+                    def fileName = output.outputFile.name
+                    if (fileName.endsWith(".apk")) {
+                        def apkPath = output.outputFile.absolutePath
+                        def line = "adb push ${apkPath} /data/local/tmp/"
+                        println(':' + project.name + ':pushInjectApk ' + line)
+                        commandLine line.split(' ')
+                    }
+                }
+            }
+            variant.outputs.forEach { output ->
+                exec {
+                    def fileName = output.outputFile.name
+                    if (fileName.endsWith(".apk")) {
+                        def line = "adb exec-out run-as io.virtualhook cp -r /data/local/tmp/${fileName} /data/data/io.virtualhook/virtual/data/inject/${fileName}"
+                        println(':' + project.name + ':pushInjectApk ' + line)
+                        commandLine line.split(' ')
+                    }
+                }
+            }
+        }
+    }
+
 }
 
 dependencies {
