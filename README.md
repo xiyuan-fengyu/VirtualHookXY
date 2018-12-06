@@ -2,7 +2,7 @@
 ## 体验方式
 1. 编译整个项目
 2. 安装运行 VirtualHook app
-3. 运行 push_inject.bat
+3. 编译 inject 模块  
 4. 在 Logcat 中添加一个 filter， tag分为： xiyuan|YAHFA，启用Regex  
     YAHFA 过滤的日志是注入过程相关的信息  
     xiyuan 过滤的日志是注入的代码打印的日志  
