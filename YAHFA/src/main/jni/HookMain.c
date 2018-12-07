@@ -120,9 +120,8 @@ static int doBackupAndHook(void *targetMethod, void *hookMethod, void *backupMet
         LOGI("Allocating done");
     }
 
-    LOGI("target method is at %p, hook method is at %p, backup method is at %p",
+    LOGI("orignal method is at %p, hook method is at %p, stub for orignal method is at %p",
          targetMethod, hookMethod, backupMethod);
-
 
     // set kAccCompileDontBother for a method we do not want the compiler to compile
     // so that we don't need to worry about hotness_count_
@@ -154,7 +153,7 @@ static int doBackupAndHook(void *targetMethod, void *hookMethod, void *backupMet
 
     // replace entry point
     void *newEntrypoint = genTrampoline(hookMethod, backupMethod);
-    LOGI("origin ep is %p, new ep is %p",
+    LOGI("origin entry point is %p, new entry point is %p",
          readAddr((char *) targetMethod + OFFSET_entry_point_from_quick_compiled_code_in_ArtMethod),
          newEntrypoint
     );
@@ -193,17 +192,10 @@ static int doBackupAndHook(void *targetMethod, void *hookMethod, void *backupMet
 
 void Java_lab_galaxy_yahfa_HookMain_bind(
         JNIEnv *env, jclass clazz, jobject original, jobject hook, jobject orignalStub) {
-    void *targetMethod = (void *)(*env)->FromReflectedMethod(env, original);
-    if(targetMethod == NULL) {
-        jclass exceptionClass =  (*env)->FindClass(env, "java/lang/Exception");
-        (*env)->ThrowNew(env, exceptionClass, "cannot find the original method");
-        return;
-    }
-
     if(!doBackupAndHook(
-            targetMethod,
+            (void *)(*env)->FromReflectedMethod(env, original),
             (void *)(*env)->FromReflectedMethod(env, hook),
-            orignalStub==NULL ? NULL : (void *)(*env)->FromReflectedMethod(env, orignalStub)
+            (void *)(*env)->FromReflectedMethod(env, orignalStub)
     )) {
         // keep a global ref so that the hook method would not be GCed
         (*env)->NewGlobalRef(env, hook);
