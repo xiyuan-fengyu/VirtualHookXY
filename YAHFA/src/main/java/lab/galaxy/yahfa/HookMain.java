@@ -32,9 +32,9 @@ public class HookMain {
             virtualHookDataPathF.setAccessible(true);
             virtualHookDataPathF.set(null, virtualHookDataPath);
 
-            Field appPackageF = hooksClass.getDeclaredField("appPackage");
-            appPackageF.setAccessible(true);
-            appPackageF.set(null, application.getPackageName());
+            Field applicationF = hooksClass.getDeclaredField("application");
+            applicationF.setAccessible(true);
+            applicationF.set(null, application);
 
             Class<?>[] hooks = (Class<?>[])hooksClass.getDeclaredField("hooks").get(null);
             for(Class<?> hook : hooks) {

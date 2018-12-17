@@ -21,7 +21,7 @@ public class Hook_Activity {
     public static void onCreate(Activity thiz, Bundle bundle) {
         Log.i("xiyuan", "onCreate: " + thiz + ", " + bundle);
         Log.i("xiyuan", "virtualHookDataPath=" + Hooks.getVirtualHookDataPath());
-        Log.i("xiyuan", "Application.packageName=" + Hooks.getAppPackage());
+        Log.i("xiyuan", "application=" + Hooks.getApplication());
         Activity_onCreate.invoke(thiz, bundle);
     }
 
