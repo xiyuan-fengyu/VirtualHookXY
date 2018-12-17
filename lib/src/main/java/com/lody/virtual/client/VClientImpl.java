@@ -353,11 +353,9 @@ public final class VClientImpl extends IVClient.Stub {
         }
         VActivityManager.get().appDoneExecuting();
 
-        ClassLoader targetClassLoader = mInitialApplication.getClassLoader();
-
         try {
             // 启动HelpServer
-            new HelpServer(targetClassLoader);
+            new HelpServer(mInitialApplication);
 
             // 从 /data/data/io.virtualhook/virtual/data/inject 加载 inject apk
             String injectDir = VEnvironment.getDataDirectory().getAbsolutePath() + "/inject";
@@ -370,8 +368,8 @@ public final class VClientImpl extends IVClient.Stub {
                                 injectApkPath,
                                 injectDir,
                                 null,
-                                targetClassLoader);
-                        HookMain.doHookDefault(hookClassLoader, targetClassLoader);
+                                mInitialApplication.getClassLoader());
+                        HookMain.doHookDefault(hookClassLoader, mInitialApplication, VEnvironment.getDataDirectory().getAbsolutePath());
                         VirtualCore.get().getComponentDelegate().afterApplicationCreate(mInitialApplication);
                         Log.i("YAHFA", "inject success: " + injectApkPath);
                     }

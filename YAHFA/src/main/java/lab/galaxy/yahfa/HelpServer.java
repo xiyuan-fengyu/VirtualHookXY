@@ -1,5 +1,6 @@
 package lab.galaxy.yahfa;
 
+import android.app.Application;
 import android.util.Log;
 
 import java.io.IOException;
@@ -21,11 +22,14 @@ public class HelpServer extends NanoHTTPD {
 
     private String ip;
 
+    private Application application;
+
     private ClassLoader originalClassLoader;
 
-    public HelpServer(ClassLoader originalClassLoader) {
+    public HelpServer(Application application) {
         super(PortChecker.findFree(8080, 9999));
-        this.originalClassLoader = originalClassLoader;
+        this.application = application;
+        this.originalClassLoader = application.getClassLoader();
         try {
             ip = LocalIp.get();
             start(NanoHTTPD.SOCKET_READ_TIMEOUT, false);

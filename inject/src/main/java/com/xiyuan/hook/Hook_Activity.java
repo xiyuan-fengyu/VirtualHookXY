@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.xiyuan.hookmethod.HookMethod;
+import com.xiyuan.hookmethod.Hooks;
 
 /**
  * Created by xiyuan_fengyu on 2018/12/4.
@@ -19,6 +20,8 @@ public class Hook_Activity {
     @HookMethod("protected void android.app.Activity.onCreate(android.os.Bundle)")
     public static void onCreate(Activity thiz, Bundle bundle) {
         Log.i("xiyuan", "onCreate: " + thiz + ", " + bundle);
+        Log.i("xiyuan", "virtualHookDataPath=" + Hooks.getVirtualHookDataPath());
+        Log.i("xiyuan", "Application.packageName=" + Hooks.getAppPackage());
         Activity_onCreate.invoke(thiz, bundle);
     }
 

@@ -1,13 +1,12 @@
 package lab.galaxy.yahfa;
 
+import android.app.Application;
 import android.util.Log;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -25,12 +24,21 @@ public class HookMain {
         init(android.os.Build.VERSION.SDK_INT);
     }
 
-    public static void doHookDefault(ClassLoader patchClassLoader, ClassLoader originClassLoader) {
+    public static void doHookDefault(ClassLoader patchClassLoader, Application application, String virtualHookDataPath) {
         try {
             Class<?> hooksClass = Class.forName("com.xiyuan.hookmethod.Hooks", true, patchClassLoader);
+
+            Field virtualHookDataPathF = hooksClass.getDeclaredField("virtualHookDataPath");
+            virtualHookDataPathF.setAccessible(true);
+            virtualHookDataPathF.set(null, virtualHookDataPath);
+
+            Field appPackageF = hooksClass.getDeclaredField("appPackage");
+            appPackageF.setAccessible(true);
+            appPackageF.set(null, application.getPackageName());
+
             Class<?>[] hooks = (Class<?>[])hooksClass.getDeclaredField("hooks").get(null);
             for(Class<?> hook : hooks) {
-                doHookItemDefault(patchClassLoader, hook, originClassLoader);
+                doHookItemDefault(patchClassLoader, hook, application.getClassLoader());
             }
         }
         catch (Exception e) {
