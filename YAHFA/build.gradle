@@ -28,11 +28,16 @@ android {
     }
     productFlavors {
     }
+    compileOptions {
+        targetCompatibility 1.8
+        sourceCompatibility 1.8
+    }
 }
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile 'org.nanohttpd:nanohttpd:2.3.1'
+    compile 'com.google.code.gson:gson:2.8.1'
+    compile 'com.koushikdutta.async:androidasync:2.2.1'
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })

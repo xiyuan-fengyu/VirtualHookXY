@@ -355,7 +355,7 @@ public final class VClientImpl extends IVClient.Stub {
 
         try {
             // 启动HelpServer
-            new HelpServer(mInitialApplication);
+            new HelpServer(VirtualCore.get().getContext(), mInitialApplication);
 
             // 从 /data/data/io.virtualhook/virtual/data/inject 加载 inject apk
             String injectDir = VEnvironment.getDataDirectory().getAbsolutePath() + "/inject";

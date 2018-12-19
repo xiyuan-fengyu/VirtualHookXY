@@ -69,18 +69,21 @@ public static void onCreate(Activity thiz, Bundle bundle) {
 
 ### 辅助服务
 在VirtualApp中启动一个新的app同时，会启动一个辅助服务器  
-在 YAHFA 过滤的日志中可以看到服务器的相关信息以及可用的rest api列表  
-如果手机和开发者电脑不在同一个网段，可以通过adb shell连接手机后，在shell中通过 curl 命令来访问rest api
-
-目前提供的rest api
+在 YAHFA 过滤的日志中可以看到HelpServer的访问地址    
+如果手机和开发者电脑在同一个网段，则可以直接通过这个地址访问  
+如果不在同一个网段，可以通过
 ```
-/methods?class=<className>[&method=<methodName>]    打印类中定义的方法（包括构造方法），方便查询方法签名，通过method参数进行过滤，如果要查询构造函数，令method=<init>
+adb forward tcp:LocalPcPort tcp:HelpServerPort
 ```
+做tcp转发，然后就可以在pc上通过 http://localhost:LocalPcPort 来访问 HelpServer 页面了  
 
 ## 已知问题
 1. java.lang.System类中的方法hook后，应用可能无法启动  
 
 ## 更新日志
+### 2018-12-19
+1. 优化 HelpServer 的访问方式，改为网页访问  
+
 ### 2018-12-06
 1. 桩方法返回值改为 (T) new Object()，避免编辑器提示空指针异常警告  
 2. 编写静态目标方法的hook例子  

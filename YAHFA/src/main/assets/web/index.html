@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Monitor Center</title>
+
+    <base href="/">
+    <script>
+        document.querySelector("base").setAttribute("href", window.location.pathname);
+    </script>
+
+    <!-- 新 Bootstrap 核心 CSS 文件 -->
+    <link rel="stylesheet" href="http://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="http://cdn.bootcss.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+    <script src="http://cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <style>
+        .highlight {
+            color: #1b90ff;
+        }
+    </style>
+
+</head>
+<body>
+    <div class="container">
+        <h1>VirtualHookXY Helper</h1>
+
+        <form class="form-horizontal">
+            <div class="form-group">
+                <label for="class" class="col-sm-2 control-label">Class</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" id="class" placeholder="class name">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="filter" class="col-sm-2 control-label">Filter</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" id="filter" placeholder="method filter">
+                </div>
+            </div>
+            <div id="error" class="form-group" style="display: none">
+                <div class="col-sm-offset-2 col-sm-10">
+                    <p id="errorContent" class="form-control-static"></p>
+                </div>
+            </div>
+        </form>
+
+        <ul id="methods" class="list-group">
+
+        </ul>
+    </div>
+
+    <script src="http://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+    <script src="http://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script>
+
+        class DelayExecution {
+
+            constructor() {
+                this.curExecuteId = "";
+            }
+
+            delayExecute(runnable, delay) {
+                this.curExecuteId = new Date().getTime() + "_" + (Math.random() * 10000).toFixed(0);
+                const tempExecuteId = this.curExecuteId;
+                setTimeout(() => {
+                    if (tempExecuteId == this.curExecuteId) {
+                        runnable();
+                    }
+                }, delay);
+            }
+
+        }
+
+        $(document).ready(() => {
+
+            let curMethods = [];
+
+            function getMethods(className) {
+                return new Promise(resolve => {
+                    $.ajax({
+                        url: "methods?class=" + className,
+                        type: "GET",
+                        success: res => resolve(res),
+                        error: e => resolve({
+                            success: false,
+                            message: e.stack
+                        })
+                    });
+                });
+            }
+
+            function reloadMethods() {
+                $("#error").hide();
+
+                const className = $("#class").val();
+                getMethods(className).then(res => {
+                    if (res.success) {
+                        curMethods = res.data;
+                    }
+                    else {
+                        curMethods = [];
+                        $("#errorContent").text(res.message);
+                        $("#error").show();
+                    }
+                    filterMethods();
+                });
+            }
+
+            function filterMethods() {
+                const filter = $("#filter").val().trim();
+                let methods;
+                if (filter.length == 0) {
+                    methods = curMethods;
+                }
+                else {
+                    let pattern = filter.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&');
+                    pattern = pattern.split(' ').filter((t) => {
+                        return t.length > 0;
+                    }).join('|');
+                    const regex = new RegExp(pattern, 'gi');
+                    methods = [];
+                    curMethods.forEach(m => {
+                        const newM = m.replace(regex, (match) => `<span class="highlight">${match}</span>`);
+                        if (newM != m) {
+                            methods.push(newM);
+                        }
+                    });
+                }
+                $("#methods").html(methods.map(m => `<li class="list-group-item">${m}</li>`).join("\n"));
+            }
+
+            const delayLoadClass = new DelayExecution();
+            const classInLS = localStorage.getItem("VirtualHookXY_class");
+            const $class = $("#class");
+            $class.val(classInLS);
+            $class.on("input", e => {
+                localStorage.setItem("VirtualHookXY_class", e.target.value);
+                delayLoadClass.delayExecute(reloadMethods, 500);
+            });
+
+            const delayFilterClass = new DelayExecution();
+            const $filter = $("#filter");
+            $filter.val(localStorage.getItem("VirtualHookXY_filter"));
+            $filter.on("input", e => {
+                localStorage.setItem("VirtualHookXY_filter", e.target.value);
+                delayFilterClass.delayExecute(filterMethods, 500);
+            });
+
+            if (classInLS) {
+                reloadMethods();
+            }
+        });
+    </script>
+</body>
+</html>
